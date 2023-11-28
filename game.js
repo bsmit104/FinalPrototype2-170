@@ -14,10 +14,35 @@ class Gameplay extends Phaser.Scene {
   }
 
   create() {
+    this.cameras.main.setBackgroundColor("#e75480");
+
+    cursors = this.input.keyboard.createCursorKeys();
+
     player = this.physics.add
-      .sprite(200 * 3, 200 * 3, playerKey)
+      .sprite(600, 600, playerKey)
       .setScale(3)
       .setDepth(2);
+  }
+
+  update() {
+
+    if (cursors.left.isDown) {
+        player.body.setVelocityX(-250);
+        player.body.setVelocityY(0);
+    }
+    else if (cursors.right.isDown) {
+        player.body.setVelocityX(250);
+        player.body.setVelocityY(0);
+    }
+    else if (cursors.up.isDown) {
+        player.body.setVelocityY(-250);
+        player.body.setVelocityX(0);
+    }
+    else if (cursors.down.isDown) {
+        player.body.setVelocityY(250);
+        player.body.setVelocityX(0);
+    }
+
   }
 }
 
@@ -77,7 +102,8 @@ class PlayerSelect extends Phaser.Scene {
       console.log("Selected character: " + playerKey);
     };
   }
-  update() {}
+  update() {
+  }
 }
 
 class Title extends Phaser.Scene {
@@ -99,7 +125,9 @@ class Gameover extends Phaser.Scene {
   create() {}
 }
 
-var playerKey;
+let playerKey;
+let cursors;
+let player;
 
 var config = {
   type: Phaser.AUTO,
