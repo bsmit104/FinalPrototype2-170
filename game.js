@@ -7,11 +7,15 @@ class Gameplay extends Phaser.Scene {
     this.load.path = "./assets/";
     this.load.image("enoki", "enoki.png");
     this.load.image("matsutake", "matsutake.png");
+    this.load.image("player2", "player2.png");
+    this.load.image("player3", "player3.png");
+    this.load.image("player4", "player4.png");
+    this.load.image("player5", "player5.png");
   }
 
   create() {
     player = this.physics.add
-      .sprite(200 * 3, 200 * 3, "matsutake")
+      .sprite(200 * 3, 200 * 3, playerKey)
       .setScale(3)
       .setDepth(2);
   }
@@ -23,7 +27,6 @@ class PlayerSelect extends Phaser.Scene {
   }
   preload() {
     this.load.path = "./assets/";
-    this.load.image("enoki", "enoki.png");
     this.load.image("matsutake", "matsutake.png");
     this.load.image("player2", "player2.png");
     this.load.image("player3", "player3.png");
@@ -32,8 +35,7 @@ class PlayerSelect extends Phaser.Scene {
     this.load.image("title", "colorTitle.png");
   }
   create() {
-
-    this.cameras.main.setBackgroundColor('#e75480'); 
+    this.cameras.main.setBackgroundColor("#e75480");
     this.title = this.add.image(560, 300, "title").setInteractive();
     this.title.setScale(2);
 
@@ -42,37 +44,38 @@ class PlayerSelect extends Phaser.Scene {
     this.character3 = this.add.image(700, 800, "player3").setInteractive();
     this.character4 = this.add.image(700, 600, "player4").setInteractive();
     this.character5 = this.add.image(500, 600, "player5").setInteractive();
-    
+
     this.character1.setScale(4);
-    this.character2.setScale(4); 
-    this.character3.setScale(4); 
-    this.character4.setScale(4); 
-    this.character5.setScale(4); 
+    this.character2.setScale(4);
+    this.character3.setScale(4);
+    this.character4.setScale(4);
+    this.character5.setScale(4);
 
-    // Set up character selection event listeners
     this.character1.on("pointerdown", function () {
-      selectCharacter("enoki");
-    });
-
-    this.character2.on("pointerdown", function () {
       selectCharacter("matsutake");
     });
 
-    function selectCharacter(characterKey) {
-      // Set the selected character key
+    this.character2.on("pointerdown", function () {
+      selectCharacter("player2");
+    });
+
+    this.character3.on("pointerdown", function () {
+      selectCharacter("player3");
+    });
+
+    this.character4.on("pointerdown", function () {
+      selectCharacter("player4");
+    });
+
+    this.character5.on("pointerdown", function () {
+      selectCharacter("player5");
+    });
+
+    const selectCharacter = (characterKey) => {
       playerKey = characterKey;
+      this.scene.start("gameplay");
       console.log("Selected character: " + playerKey);
-
-      // Call a function to create the player using the selected character key
-      //createPlayer(selectedCharacterKey);
-    }
-
-    // function createPlayer(characterKey) {
-    //   // Create the player sprite using the selected character key
-    //   var player = game.add.sprite(100, 100, characterKey);
-
-    //   // Add additional player setup logic as needed
-    // }
+    };
   }
   update() {}
 }
@@ -121,7 +124,7 @@ var config = {
   input: {
     activePointers: 5,
   },
-  scene: [PlayerSelect], //Title, Gameplay, Gameover],
+  scene: [PlayerSelect, Gameplay], //Title, Gameplay, Gameover],
 };
 
 var game = new Phaser.Game(config);
