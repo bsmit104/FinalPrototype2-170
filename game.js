@@ -11,38 +11,86 @@ class Gameplay extends Phaser.Scene {
     this.load.image("player3", "player3.png");
     this.load.image("player4", "player4.png");
     this.load.image("player5", "player5.png");
+    this.load.image("rock", "rock.png");
+  }
+
+  spawnRockWithinView() {
+    this.halfScreenWidth = this.cameras.main.width / 2;
+    this.halfScreenHeight = this.cameras.main.height / 2;
+
+    const spawnX = Phaser.Math.Between(
+      this.cameras.main.scrollX - this.halfScreenWidth,
+      this.cameras.main.scrollX + this.halfScreenWidth
+    );
+    const spawnY = Phaser.Math.Between(
+      this.cameras.main.scrollY - this.halfScreenHeight,
+      this.cameras.main.scrollY + this.halfScreenHeight
+    );
+
+    const rock = rocks.create(spawnX, spawnY, "rock");
+    rock.setCollideWorldBounds(true);
+    rock.setBounce(1);
+
+    rock.setVelocity(0, 0);
+  }
+
+  resetRock(rock) {
+    rock.x = Phaser.Math.Between(player.x - this.halfScreenWidth, player.x + this.halfScreenWidth);
+    rock.y = Phaser.Math.Between(player.y - this.halfScreenHeight, player.y + this.halfScreenHeight);
   }
 
   create() {
     this.cameras.main.setBackgroundColor("#e75480");
-
     cursors = this.input.keyboard.createCursorKeys();
+
+    this.worldWidth = 5000;
+    this.worldHeight = 5000;
+
+    this.physics.world.setBounds(0, 0, this.worldWidth, this.worldHeight);
 
     player = this.physics.add
       .sprite(600, 600, playerKey)
       .setScale(3)
       .setDepth(2);
+
+    this.cameras.main.setBounds(0, 0, this.worldWidth, this.worldHeight);
+    this.cameras.main.startFollow(player);
+
+    rocks = this.physics.add.group();
+    this.spawnRockWithinView();
   }
 
   update() {
-
     if (cursors.left.isDown) {
-        player.body.setVelocityX(-250);
-        player.body.setVelocityY(0);
+      player.body.setVelocityX(-250);
+      player.body.setVelocityY(0);
+    } else if (cursors.right.isDown) {
+      player.body.setVelocityX(250);
+      player.body.setVelocityY(0);
+    } else if (cursors.up.isDown) {
+      player.body.setVelocityY(-250);
+      player.body.setVelocityX(0);
+    } else if (cursors.down.isDown) {
+      player.body.setVelocityY(250);
+      player.body.setVelocityX(0);
     }
-    else if (cursors.right.isDown) {
-        player.body.setVelocityX(250);
-        player.body.setVelocityY(0);
-    }
-    else if (cursors.up.isDown) {
-        player.body.setVelocityY(-250);
-        player.body.setVelocityX(0);
-    }
-    else if (cursors.down.isDown) {
-        player.body.setVelocityY(250);
-        player.body.setVelocityX(0);
+    else {
+      player.body.setVelocityY(0);
+      player.body.setVelocityX(0);
     }
 
+    rocks.children.iterate(function (rock) {
+      const cameraLeftBound = this.cameras.main.scrollX;
+      const cameraRightBound = this.cameras.main.scrollX + this.cameras.main.width;
+  
+      if (rock.getBounds().right < cameraLeftBound || rock.getBounds().left > cameraRightBound) {
+        this.resetRock(rock);
+      }
+    }, this);
+  
+    if (rocks.countActive() < 10) {
+      this.spawnRockWithinView();
+    }
   }
 }
 
@@ -102,8 +150,7 @@ class PlayerSelect extends Phaser.Scene {
       console.log("Selected character: " + playerKey);
     };
   }
-  update() {
-  }
+  update() {}
 }
 
 class Title extends Phaser.Scene {
@@ -128,6 +175,7 @@ class Gameover extends Phaser.Scene {
 let playerKey;
 let cursors;
 let player;
+let rocks;
 
 var config = {
   type: Phaser.AUTO,
