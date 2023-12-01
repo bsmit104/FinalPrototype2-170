@@ -15,6 +15,7 @@ class Gameplay extends Phaser.Scene {
   }
 
   spawnRockWithinView() {
+    console.log('Camera Bounds:', this.cameras.main.worldView);
     this.halfScreenWidth = this.cameras.main.width / 2;
     this.halfScreenHeight = this.cameras.main.height / 2;
 
@@ -30,26 +31,74 @@ class Gameplay extends Phaser.Scene {
     const rock = rocks.create(spawnX, spawnY, "rock");
     rock.setCollideWorldBounds(true);
     rock.setBounce(1);
+    rock.setScale(3);
 
     rock.setVelocity(0, 0);
   }
 
   resetRock(rock) {
-    rock.x = Phaser.Math.Between(player.x - this.halfScreenWidth, player.x + this.halfScreenWidth);
-    rock.y = Phaser.Math.Between(player.y - this.halfScreenHeight, player.y + this.halfScreenHeight);
+    console.log('Camera Bounds:', this.cameras.main.worldView);
+    if (startingGame) {
+      rock.x = Phaser.Math.Between(
+        player.x - this.halfScreenWidth,
+        player.x + this.halfScreenWidth
+      );
+      rock.y = Phaser.Math.Between(
+        player.y - this.halfScreenHeight,
+        player.y + this.halfScreenHeight
+      );
+    } else {
+      if (right) {
+        rock.x = Phaser.Math.Between(
+          player.x + this.halfScreenWidth,
+          player.x + this.halfScreenWidth - 50
+        );
+        rock.y = Phaser.Math.Between(
+          player.y - this.halfScreenHeight,
+          player.y + this.halfScreenHeight
+        );
+      } else if (left) {
+        rock.x = Phaser.Math.Between(
+          player.x - this.halfScreenWidth,
+          player.x - this.halfScreenWidth + 50
+        );
+        rock.y = Phaser.Math.Between(
+          player.y - this.halfScreenHeight,
+          player.y + this.halfScreenHeight
+        );
+      } else if (up) {
+        rock.x = Phaser.Math.Between(
+            player.x - this.halfScreenWidth,
+            player.x + this.halfScreenWidth
+        );
+        rock.y = Phaser.Math.Between(
+            this.cameras.main.scrollY,
+            player.y + this.halfScreenHeight - 50
+        );
+    } else if (down) {
+        rock.x = Phaser.Math.Between(
+            player.x - this.halfScreenWidth,
+            player.x + this.halfScreenWidth
+        );
+        rock.y = Phaser.Math.Between(
+            player.y - this.halfScreenHeight + 50,
+            player.y - this.halfScreenHeight
+        );
+    }
+    }
   }
 
   create() {
     this.cameras.main.setBackgroundColor("#e75480");
     cursors = this.input.keyboard.createCursorKeys();
 
-    this.worldWidth = 5000;
-    this.worldHeight = 5000;
+    this.worldWidth = 10000;
+    this.worldHeight = 10000;
 
     this.physics.world.setBounds(0, 0, this.worldWidth, this.worldHeight);
 
     player = this.physics.add
-      .sprite(600, 600, playerKey)
+      .sprite(5000, 5000, playerKey)
       .setScale(3)
       .setDepth(2);
 
@@ -64,30 +113,56 @@ class Gameplay extends Phaser.Scene {
     if (cursors.left.isDown) {
       player.body.setVelocityX(-250);
       player.body.setVelocityY(0);
+      left = true;
+      right = false;
+      up = false;
+      down = false;
     } else if (cursors.right.isDown) {
       player.body.setVelocityX(250);
       player.body.setVelocityY(0);
+      left = false;
+      right = true;
+      up = false;
+      down = false;
     } else if (cursors.up.isDown) {
       player.body.setVelocityY(-250);
       player.body.setVelocityX(0);
+      left = false;
+      right = false;
+      up = true;
+      down = false;
     } else if (cursors.down.isDown) {
       player.body.setVelocityY(250);
       player.body.setVelocityX(0);
-    }
-    else {
+      left = false;
+      right = false;
+      up = false;
+      down = true;
+    } else {
       player.body.setVelocityY(0);
       player.body.setVelocityX(0);
+      // left = false;
+      // right = false;
+      // up = false;
+      // down = false;
     }
 
     rocks.children.iterate(function (rock) {
       const cameraLeftBound = this.cameras.main.scrollX;
       const cameraRightBound = this.cameras.main.scrollX + this.cameras.main.width;
+      const cameraTopBound = this.cameras.main.scrollY;
+      const cameraBottomBound = this.cameras.main.scrollY + this.cameras.main.height;
   
-      if (rock.getBounds().right < cameraLeftBound || rock.getBounds().left > cameraRightBound) {
-        this.resetRock(rock);
+      if (
+          rock.getBounds().right < cameraLeftBound ||
+          rock.getBounds().left > cameraRightBound ||
+          rock.getBounds().bottom < cameraTopBound ||
+          rock.getBounds().top > cameraBottomBound
+      ) {
+          this.resetRock(rock);
       }
-    }, this);
-  
+  }, this);
+
     if (rocks.countActive() < 10) {
       this.spawnRockWithinView();
     }
@@ -176,6 +251,11 @@ let playerKey;
 let cursors;
 let player;
 let rocks;
+let left = false;
+let right = false;
+let up = false;
+let down = false;
+let startingGame = false;
 
 var config = {
   type: Phaser.AUTO,
