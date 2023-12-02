@@ -72,8 +72,8 @@ class Gameplay extends Phaser.Scene {
             player.x + this.halfScreenWidth
         );
         rock.y = Phaser.Math.Between(
-            this.cameras.main.scrollY,
-            player.y + this.halfScreenHeight - 50
+          player.y - this.halfScreenHeight,
+          player.y - this.halfScreenHeight - 50
         );
     } else if (down) {
         rock.x = Phaser.Math.Between(
@@ -81,8 +81,8 @@ class Gameplay extends Phaser.Scene {
             player.x + this.halfScreenWidth
         );
         rock.y = Phaser.Math.Between(
-            player.y - this.halfScreenHeight + 50,
-            player.y - this.halfScreenHeight
+            player.y + this.halfScreenHeight + 50,
+            player.y + this.halfScreenHeight
         );
     }
     }
