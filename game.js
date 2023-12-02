@@ -12,6 +12,10 @@ class Gameplay extends Phaser.Scene {
     this.load.image("player4", "player4.png");
     this.load.image("player5", "player5.png");
     this.load.image("rock", "rock.png");
+
+    // joystick
+    let url = 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexvirtualjoystickplugin.min.js';
+    this.load.plugin('rexvirtualjoystickplugin', url, true);
   }
 
   spawnRockWithinView() {
@@ -108,6 +112,17 @@ class Gameplay extends Phaser.Scene {
     this.spawnRockWithinView();
 
     this.physics.add.collider(rocks, player);
+
+    // joystick
+    this.joyStick = this.plugins.get('rexvirtualjoystickplugin').add(this, {
+      x: 200,
+      y: 800,
+      radius: 100,
+      base: this.add.circle(0, 0, 100, 0x888888),
+      thumb: this.add.circle(0, 0, 30, 0xcccccc),
+    });
+
+    this.joystickCursors = this.joyStick.createCursorKeys();
   }
 
   update() {
@@ -146,6 +161,43 @@ class Gameplay extends Phaser.Scene {
       // right = false;
       // up = false;
       // down = false;
+
+      if (this.joystickCursors.left.isDown) {
+        player.body.setVelocityX(-250);
+        player.body.setVelocityY(0);
+        left = true;
+        right = false;
+        up = false;
+        down = false;
+      } else if (this.joystickCursors.right.isDown) {
+        player.body.setVelocityX(250);
+        player.body.setVelocityY(0);
+        left = false;
+        right = true;
+        up = false;
+        down = false;
+      } else if (this.joystickCursors.up.isDown) {
+        player.body.setVelocityY(-250);
+        player.body.setVelocityX(0);
+        left = false;
+        right = false;
+        up = true;
+        down = false;
+      } else if (this.joystickCursors.down.isDown) {
+        player.body.setVelocityY(250);
+        player.body.setVelocityX(0);
+        left = false;
+        right = false;
+        up = false;
+        down = true;
+      } else {
+        player.body.setVelocityY(0);
+        player.body.setVelocityX(0);
+        // left = false;
+        // right = false;
+        // up = false;
+        // down = false;
+      }
     }
 
     rocks.children.iterate(function (rock) {
