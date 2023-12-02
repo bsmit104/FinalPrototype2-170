@@ -15,7 +15,6 @@ class Gameplay extends Phaser.Scene {
   }
 
   spawnRockWithinView() {
-    console.log('Camera Bounds:', this.cameras.main.worldView);
     this.halfScreenWidth = this.cameras.main.width / 2;
     this.halfScreenHeight = this.cameras.main.height / 2;
 
@@ -32,12 +31,12 @@ class Gameplay extends Phaser.Scene {
     rock.setCollideWorldBounds(true);
     rock.setBounce(1);
     rock.setScale(3);
+    rock.body.setImmovable(true);
 
     rock.setVelocity(0, 0);
   }
 
   resetRock(rock) {
-    console.log('Camera Bounds:', this.cameras.main.worldView);
     if (startingGame) {
       rock.x = Phaser.Math.Between(
         player.x - this.halfScreenWidth,
@@ -107,6 +106,8 @@ class Gameplay extends Phaser.Scene {
 
     rocks = this.physics.add.group();
     this.spawnRockWithinView();
+
+    this.physics.add.collider(rocks, player);
   }
 
   update() {
