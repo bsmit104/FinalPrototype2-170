@@ -90,7 +90,8 @@ class Gameplay extends Phaser.Scene {
     }
     }
   }
-
+  
+  
   create() {
     this.cameras.main.setBackgroundColor("#e75480");
     cursors = this.input.keyboard.createCursorKeys();
@@ -123,9 +124,14 @@ class Gameplay extends Phaser.Scene {
     });
 
     this.joystickCursors = this.joyStick.createCursorKeys();
+
+    enemyEnoki = this.physics.add.sprite(5500,5500,'enoki').setScale(3).setDepth(2);
+    this.physics.add.collider(player, enemyEnoki);
+
   }
 
   update() {
+
     if (cursors.left.isDown) {
       player.body.setVelocityX(-250);
       player.body.setVelocityY(0);
@@ -219,7 +225,18 @@ class Gameplay extends Phaser.Scene {
     if (rocks.countActive() < 10) {
       this.spawnRockWithinView();
     }
+
+
+    const speed = 2;
+
+    // Calculate the angle between the enemy and the player
+    const angle = Phaser.Math.Angle.Between(enemyEnoki.x, enemyEnoki.y, player.x, player.y);
+
+    // Set the velocity based on the angle
+    enemyEnoki.setVelocityX(Math.cos(angle) * speed * 60);
+    enemyEnoki.setVelocityY(Math.sin(angle) * speed * 60);
   }
+
 }
 
 class PlayerSelect extends Phaser.Scene {
@@ -301,6 +318,7 @@ class Gameover extends Phaser.Scene {
 }
 
 let playerKey;
+let enemyEnoki;
 let cursors;
 let player;
 let rocks;
