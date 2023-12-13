@@ -112,6 +112,7 @@ class Gameplay extends Phaser.Scene {
     this.spawnRockWithinView();
 
     this.physics.add.collider(rocks, player);
+    this.physics.add.collider(rocks, enemyEnoki)
 
     // joystick
     this.joyStick = this.plugins.get('rexvirtualjoystickplugin').add(this, {
@@ -254,14 +255,18 @@ class Gameplay extends Phaser.Scene {
     const elapsedTime = currentTime - this.time; // Use this.time to track elapsed time
     
     console.log(elapsedTime)
-    if (elapsedTime % 10000 == 0) {
-      this.speed += 1; 
+    if (elapsedTime >10000) {
+      this.speed += .0003; 
       console.log("Speed increased", this.speed);
 
     }
 
     const seconds = Math.floor(elapsedTime / 1000);
     this.timerText.setText(`Time: ${seconds}`);
+
+    if (seconds == 50) {
+      this.scene.start("title")
+    }
   }
 
 
@@ -333,7 +338,30 @@ class Title extends Phaser.Scene {
   preload() {
     this.load.path = "./assets/";
   }
-  create() {}
+  create() {
+    // Set the background color
+    this.cameras.main.setBackgroundColor("#e75480");
+
+    // Display a congratulatory message
+    const congratsText = this.add.text(400, 300, 'Congratulations!', { 
+      fontSize: '64px', 
+      fill: '#fff',
+      align: 'center'
+    });
+    congratsText.setOrigin(0.5);
+
+    // Add a button to start the game
+    const startButton = this.add.text(400, 400, 'Start Game', { 
+      fontSize: '32px', 
+      fill: '#fff',
+      align: 'center'
+    })
+    .setInteractive()
+    .on('pointerdown', () => {
+      this.scene.start('select'); // Change this to your gameplay scene name
+    });
+    startButton.setOrigin(0.5);
+  }
   update() {}
 }
 
@@ -390,7 +418,7 @@ var config = {
   input: {
     activePointers: 5,
   },
-  scene: [PlayerSelect, Gameplay, Gameover] //Title, Gameplay, Gameover],
+  scene: [PlayerSelect, Gameplay, Gameover, Title] //Title, Gameplay, Gameover],
 };
 
 class Clock extends Phaser.Scene {
