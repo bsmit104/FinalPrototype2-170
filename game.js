@@ -1,6 +1,7 @@
 class Gameplay extends Phaser.Scene {
   constructor() {
     super("gameplay");
+    this.speed = 2; 
   }
 
   preload() {
@@ -101,10 +102,8 @@ class Gameplay extends Phaser.Scene {
 
     this.physics.world.setBounds(0, 0, this.worldWidth, this.worldHeight);
 
-    player = this.physics.add
-      .sprite(5000, 5000, playerKey)
-      .setScale(3)
-      .setDepth(2);
+    player = this.physics.add.sprite(5000, 5000, playerKey).setScale(3).setDepth(2);
+    enemyEnoki = this.physics.add.sprite(5500, 5500, 'enoki').setScale(3).setDepth(2);
 
     this.cameras.main.setBounds(0, 0, this.worldWidth, this.worldHeight);
     this.cameras.main.startFollow(player);
@@ -125,8 +124,18 @@ class Gameplay extends Phaser.Scene {
 
     this.joystickCursors = this.joyStick.createCursorKeys();
 
-    enemyEnoki = this.physics.add.sprite(5500,5500,'enoki').setScale(3).setDepth(2);
-    this.physics.add.collider(player, enemyEnoki);
+    //enemyEnoki = this.physics.add.sprite(5500,5500,'enoki').setScale(3).setDepth(2);
+    this.time = Date.now();
+
+    this.timerText = this.add.text(20, 20, 'Time: 0', {
+      fontSize: '24px',
+      fill: '#fff'
+    }).setScrollFactor(0); // Make the text stationary when the camera moves
+
+    // ... (existing code)
+
+    this.startTime = this.time.now;
+
 
   }
 
@@ -204,6 +213,15 @@ class Gameplay extends Phaser.Scene {
         // up = false;
         // down = false;
       }
+
+
+      if (this.physics.overlap(player, enemyEnoki)) {
+        console.log("Collision detected");
+        this.scene.start("gameOver")
+        // Handle collision behavior here, like game over or any other actions
+        // this.scene.start("gameOver");
+      }
+
     }
 
     rocks.children.iterate(function (rock) {
@@ -225,17 +243,27 @@ class Gameplay extends Phaser.Scene {
     if (rocks.countActive() < 10) {
       this.spawnRockWithinView();
     }
-
-
-    const speed = 2;
-
     // Calculate the angle between the enemy and the player
     const angle = Phaser.Math.Angle.Between(enemyEnoki.x, enemyEnoki.y, player.x, player.y);
 
     // Set the velocity based on the angle
-    enemyEnoki.setVelocityX(Math.cos(angle) * speed * 60);
-    enemyEnoki.setVelocityY(Math.sin(angle) * speed * 60);
+    enemyEnoki.setVelocityX(Math.cos(angle) * this.speed * 60);
+    enemyEnoki.setVelocityY(Math.sin(angle) * this.speed * 60);
+
+    const currentTime = Date.now();
+    const elapsedTime = currentTime - this.time; // Use this.time to track elapsed time
+    
+    console.log(elapsedTime)
+    if (elapsedTime % 10000 == 0) {
+      this.speed += 1; 
+      console.log("Speed increased", this.speed);
+
+    }
+
+    const seconds = Math.floor(elapsedTime / 1000);
+    this.timerText.setText(`Time: ${seconds}`);
   }
+
 
 }
 
@@ -314,7 +342,18 @@ class Gameover extends Phaser.Scene {
     super("gameOver");
   }
 
-  create() {}
+  create() {
+    this.add.text(400, 300, 'Game Over', { fontSize: '64px', fill: '#fff' });
+
+    // Add a button to restart the game
+    const playAgainButton = this.add.text(400, 400, 'Play Again', { fontSize: '32px', fill: '#fff' })
+      .setInteractive()
+      .on('pointerdown', () => {
+        this.scene.start('select');
+      });
+    playAgainButton.setOrigin(0.5);
+  
+  }
 }
 
 let playerKey;
@@ -351,7 +390,11 @@ var config = {
   input: {
     activePointers: 5,
   },
-  scene: [PlayerSelect, Gameplay], //Title, Gameplay, Gameover],
+  scene: [PlayerSelect, Gameplay, Gameover] //Title, Gameplay, Gameover],
 };
+
+class Clock extends Phaser.Scene {
+
+}
 
 var game = new Phaser.Game(config);
